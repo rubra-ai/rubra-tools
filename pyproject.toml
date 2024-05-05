@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llama-tools"
+version = "0.1.0"
+description = "A simple package that helps local llms to format function calls"
+readme = "README.md"
+authors = [{name = "Yingbei Tong", email = "yingbei@acorn.io"}]
+license = {file = "LICENSE"}
+dependencies = [
+    # List your dependencies here, e.g., "requests>=2.23.0"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.8"
+dynamic = ["version", "description"]
+
+[tool.setuptools]
+packages = ["llama-tools"]
+package-dir = {"": "src"}
