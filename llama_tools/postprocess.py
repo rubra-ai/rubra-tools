@@ -1,5 +1,3 @@
-from json_repair import repair_json
-import json_repair
 import json
 import uuid
 from typing import List
@@ -9,7 +7,7 @@ def postprocess_output(output_str: str) -> List[dict]:
         return []
     str_to_parse = output_str.split("<<functions>>")[1]
     try:
-        function_call_json = json_repair.loads(str_to_parse)
+        function_call_json = json.loads(str_to_parse)
     except:
         return []
     res = []
@@ -19,14 +17,6 @@ def postprocess_output(output_str: str) -> List[dict]:
             "function": fc,
             "type": "function",
         })
-        print(fc["name"])
-        print(fc["arguments"])
-        try:
-            args = json.loads(fc["arguments"])
-            print(args)
-        except:
-            args = json_repair.loads(fc["arguments"])
-            print(args)
     return res
 
 if __name__ == "__main__":
