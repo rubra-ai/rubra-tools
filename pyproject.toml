@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [{name = "Yingbei Tong", email = "yingbei@acorn.io"}]
 license = {file = "LICENSE"}
 dependencies = [
-    # List your dependencies here, e.g., "requests>=2.23.0"
+    "json_repair>=0.17.0"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

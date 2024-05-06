@@ -158,7 +158,7 @@ def format_tools(tools: List[dict]) -> str:
 
 
 
-def preprocess(msgs: List[dict], tools: List[dict]):
+def preprocess_input(msgs: List[dict], tools: List[dict]):
     tool_system_prompt = format_tools(tools)
     processed_msgs = process_messages(msgs, tool_system_prompt)
     return processed_msgs
@@ -232,6 +232,6 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
 if __name__ == "__main__":
     tools = [{"type": "function","function":{"name":"calculate_distance","description":"Calculate the distance between two locations","parameters":{"type":"object","properties":{"origin":{"type":"string","description":"The starting location"},"destination":{"type":"string","description":"The destination location"},"mode":{"type":"string","description":"The mode of transportation"}},"required":["origin","destination","mode"]}}},{"type": "function","function":{"name":"generate_password","description":"Generate a random password","parameters":{"type":"object","properties":{"length":{"type":"integer","description":"The length of the password"}},"required":["length"]}}}]
     msgs = [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'What is the distance between San Francisco and Cupertino by driving and by air from both directions?'}, {'role': 'assistant', 'tool_calls': [{'id': '0', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"drive"}'}, 'type': 'function'}]}, {'role': 'tool', 'tool_call_id': '0', 'name': 'calculate_distance', 'content': 'Distance is 50 miles.'}]
-    new_msgs = preprocess(msgs, tools)
+    new_msgs = preprocess_input(msgs, tools)
     print(json.dumps(new_msgs, indent=2))
     
