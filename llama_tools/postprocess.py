@@ -10,9 +10,11 @@ def postprocess_output(output_str: str) -> List[dict]:
     function_call_json = []
     try: # every function call has to be valid json
         for l in list_of_str_to_parse:
-            function_call_json.append(json.loads(l))
+            fc = json.loads(l)
+            fc["arguments"] = json.dumps(fc["arguments"])
+            function_call_json.append(fc)
     except Exception as e:
-        print(e)
+        print(f"Error : {e}")
     res = []
     for fc in function_call_json:
         res.append({
@@ -23,7 +25,8 @@ def postprocess_output(output_str: str) -> List[dict]:
     return res
 
 if __name__ == "__main__":
-    output_str = "<functions>{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"drive\\\"}\"}\n{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"air\\\"}\"}"
+    # output_str = "<functions>{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"drive\\\"}\"}\n{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"air\\\"}\"}"
+    output_str = '<functions>{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "driving"}}\n{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "air"}}'
     parsed_json = postprocess_output(output_str)
     if parsed_json:
         print(f"PARSED_JSON type: {type(parsed_json)}")
