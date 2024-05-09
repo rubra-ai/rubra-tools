@@ -3,9 +3,12 @@ import json
 
 
 TOOL_SYSTEM_PROMPT_RUBRA = (
-    "You have access to the following tools:\n{tool_text}"
-    "Use the following format if using a tool:\n<<functions>>[toolname1(arg1=value1, arg2=value2, ...), toolname2(arg1=value1, arg2=value2, ...)]"
-    "You can choose to respond with 1 or more tool calls at once, or with a chat message back to the user. Only make tool calls once you have all the details to fill in the required params. Feel free to ask the user for more info when appropriate. Any tool call you make must match the name of a function(s) provided above."
+    "You have access to the following tools: {tool_text}\n"
+    "You can choose to respond with one or more tool calls at once, or with a chat message back to the user. "
+    "Ensure you have all necessary details before making tool calls. If additional information is needed, "
+    "ask the user appropriately. Any tool call you make must correspond to the functions listed above.\n"
+    "If you decide to call tools, format your response in JSONL. Start with the keyword `<functions>` followed by the JSON object:\n"
+    '`<functions>{{"name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}`'
 )
 
 def json_schema_to_typescript_type(schema, param_name):
@@ -222,16 +225,16 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
         tool_call_id = tool_call["id"]
         func_observation_map[tool_call_id] = ""  # Initialize with empty value, updated later from the message with tool role
         
-        tool_list.append(tool_call["function"])
+        tool_list.append(json.dumps(tool_call["function"]))
 
     # Converting the Python dictionary to a YAML formatted string
-    tool_call_str = "<<functions>>" + json.dumps(tool_list)
+    tool_call_str = "<functions>" + "\n".join(tool_list)
     return tool_call_str
 
 
 if __name__ == "__main__":
     tools = [{"type": "function","function":{"name":"calculate_distance","description":"Calculate the distance between two locations","parameters":{"type":"object","properties":{"origin":{"type":"string","description":"The starting location"},"destination":{"type":"string","description":"The destination location"},"mode":{"type":"string","description":"The mode of transportation"}},"required":["origin","destination","mode"]}}},{"type": "function","function":{"name":"generate_password","description":"Generate a random password","parameters":{"type":"object","properties":{"length":{"type":"integer","description":"The length of the password"}},"required":["length"]}}}]
-    msgs = [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'What is the distance between San Francisco and Cupertino by driving and by air from both directions?'}, {'role': 'assistant', 'tool_calls': [{'id': '0', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"drive"}'}, 'type': 'function'}]}, {'role': 'tool', 'tool_call_id': '0', 'name': 'calculate_distance', 'content': 'Distance is 50 miles.'}]
+    msgs = [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'What is the distance between San Francisco and Cupertino by driving and by air from both directions?'}, {'role': 'assistant', 'tool_calls': [{'id': '0', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San \nFrancisco","destination":"Cupertino","mode":"drive"}'}, 'type': 'function'},{'id': '1', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San \nFrancisco","destination":"Cupertino","mode":"air"}'}, 'type': 'function'}]}, {'role': 'tool', 'tool_call_id': '0', 'name': 'calculate_distance', 'content': 'Distance is 50 miles.'}, {'role': 'tool', 'tool_call_id': '1', 'name': 'calculate_distance', 'content': 'Distance  by air is 50 miles.'}]
     new_msgs = preprocess_input(msgs, tools)
     print(json.dumps(new_msgs, indent=2))
     
