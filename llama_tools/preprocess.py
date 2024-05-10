@@ -175,7 +175,7 @@ def process_messages(messages: List[dict], function_str: str):
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
             # Insert the observation from the tool call before the next message
             func_observation_array = list(func_observation_map.values())
-            observation_str = "<<observation>>" + json.dumps(func_observation_array)
+            observation_str = json.dumps(func_observation_array)
             observation_call = {"role": "observation", "content": observation_str}
             processed_msg.append(observation_call)
             func_observation_map.clear()
@@ -211,7 +211,7 @@ def process_messages(messages: List[dict], function_str: str):
     if len(func_observation_map) > 0:
         # Insert the observation from the tool call before the next message
         func_observation_array = list(func_observation_map.values())
-        observation_str = "<<observation>>" + json.dumps(func_observation_array)
+        observation_str = json.dumps(func_observation_array)
         observation_call = {"role": "observation", "content": observation_str}
         processed_msg.append(observation_call)
         func_observation_map.clear()
@@ -228,7 +228,7 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
         tool_list.append(str(tool_call["function"]))
 
     # Converting the Python dictionary to a YAML formatted string
-    tool_call_str = "<functions>" + "\n".join(tool_list)
+    tool_call_str = "\n".join(tool_list)
     return tool_call_str
 
 

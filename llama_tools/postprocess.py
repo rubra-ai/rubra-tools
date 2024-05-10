@@ -6,7 +6,7 @@ def postprocess_output(output_str: str) -> List[dict]:
     if not output_str.lstrip().startswith("<functions>"):
         return []
     str_to_parse = output_str.split("<functions>")[1]
-    list_of_str_to_parse = str_to_parse.splitlines()
+    list_of_str_to_parse = str_to_parse.splitlines() # TODO: need better way to handle jsonl format
     function_call_json = []
     try: # every function call has to be valid json
         for l in list_of_str_to_parse:
