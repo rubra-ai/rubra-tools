@@ -11,7 +11,8 @@ def postprocess_output(output_str: str) -> List[dict]:
     try: # every function call has to be valid json
         for l in list_of_str_to_parse:
             fc = json.loads(l)
-            fc["arguments"] = json.dumps(fc["arguments"])
+            if type(fc["arguments"]) != str:
+                fc["arguments"] = json.dumps(fc["arguments"])
             function_call_json.append(fc)
     except Exception as e:
         print(f"Error : {e}")

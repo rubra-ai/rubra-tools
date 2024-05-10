@@ -3,7 +3,7 @@ import json
 
 
 TOOL_SYSTEM_PROMPT_RUBRA = (
-    "You have access to the following tools: {tool_text}\n"
+    "You have access to the following tools:\n {tool_text}\n"
     "You can choose to respond with one or more tool calls at once, or with a chat message back to the user. "
     "Ensure you have all necessary details before making tool calls. If additional information is needed, "
     "ask the user appropriately. Any tool call you make must correspond to the functions listed above.\n"
@@ -225,7 +225,7 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
         tool_call_id = tool_call["id"]
         func_observation_map[tool_call_id] = ""  # Initialize with empty value, updated later from the message with tool role
         
-        tool_list.append(json.dumps(tool_call["function"]))
+        tool_list.append(str(tool_call["function"]))
 
     # Converting the Python dictionary to a YAML formatted string
     tool_call_str = "<functions>" + "\n".join(tool_list)
