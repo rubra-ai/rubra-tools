@@ -174,17 +174,19 @@ def process_messages(messages: List[dict], function_str: str):
     processed_msg = []
 
     for i in range(len(messages)):
+        print(f"\n=============This Message : {messages[i]}================\n\n")
+        
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
             # Insert the observation from the tool call before the next message
             func_observation_array = list(func_observation_map.values())
-            for i,a in enumerate(func_observation_array):
+            for x,a in enumerate(func_observation_array):
                 if a == "":
-                    func_observation_array[i] = "done"
+                    func_observation_array[x] = "done"
             observation_str = json.dumps(func_observation_array)
             
             observation_call = {"role": "observation", "content": observation_str}
             processed_msg.append(observation_call)
-            func_observation_map.clear()
+            func_observation_map = {}
 
         if i == 0:
             if messages[0]["role"] == "system":
@@ -208,18 +210,21 @@ def process_messages(messages: List[dict], function_str: str):
             if tool_call_id in func_observation_map:
                 func_observation_map[tool_call_id] = messages[i]["content"]
             else:
+                print(func_observation_map)
                 print(f"Tool call id not found in the map: {tool_call_id}")
                 # TODO: the input is not valid in this case, should return an error
 
         else:
             processed_msg.append(messages[i])
+        
+        print(processed_msg)
 
     if len(func_observation_map) > 0:
         # Insert the observation from the tool call before the next message
         func_observation_array = list(func_observation_map.values())
-        for i,a in enumerate(func_observation_array):
+        for x,a in enumerate(func_observation_array):
             if a == "":
-                func_observation_array[i] = "done"
+                func_observation_array[x] = "done"
         observation_str = json.dumps(func_observation_array)
         observation_call = {"role": "observation", "content": observation_str}
         processed_msg.append(observation_call)
@@ -252,7 +257,8 @@ if __name__ == "__main__":
                 "parameters": None,
             }
         },{"type": "function","function":{"name":"calculate_distance","description":"Calculate the distance between two locations","parameters":{"type":"object","properties":{"origin":{"type":"string","description":"The starting location"},"destination":{"type":"string","description":"The destination location"},"mode":{"type":"string","description":"The mode of transportation"}},"required":["origin","destination","mode"]}}},{"type": "function","function":{"name":"generate_password","description":"Generate a random password","parameters":{"type":"object","properties":{"length":{"type":"integer","description":"The length of the password"}},"required":["length"]}}}]
-    msgs = [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'What is the distance between San Francisco and Cupertino by driving and by air from both directions?'}, {'role': 'assistant', 'tool_calls': [{'id': '0', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"drive"}'}, 'type': 'function'},{'id': '1', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"air"}'}, 'type': 'function'}]}, {'role': 'tool', 'tool_call_id': '0', 'name': 'calculate_distance', 'content': 'Distance is 50 miles.'}, {'role': 'tool', 'tool_call_id': '1', 'name': 'calculate_distance', 'content': ''}]
+    # msgs = [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'What is the distance between San Francisco and Cupertino by driving and by air from both directions?'}, {'role': 'assistant', 'tool_calls': [{'id': '0', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"drive"}'}, 'type': 'function'},{'id': '1', 'function': {'name': 'calculate_distance', 'arguments': '{"origin":"San Francisco","destination":"Cupertino","mode":"air"}'}, 'type': 'function'}]}, {'role': 'tool', 'tool_call_id': '0', 'name': 'calculate_distance', 'content': 'Distance is 50 miles.'}, {'role': 'tool', 'tool_call_id': '1', 'name': 'calculate_distance', 'content': ''}]
+    msgs = [{'role': 'user', 'content': "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nDownload https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to a\nrandom file. Then expand the archive to a temporary location as there is a sqlite\ndatabase in it.\n\nFirst inspect the schema of the database to understand the table structure.\n\nForm and run a SQL query to find the artist with the most number of albums and output\nthe result of that.\n\nWhen done remove the database file and the downloaded content."}, {'role': 'assistant', 'content': '', 'tool_calls': [{'id': 'cdf7eb2e', 'type': 'function', 'function': {'name': 'download', 'arguments': '{"url":"https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip"}'}}]}, {'role': 'tool', 'content': '/tmp/gpt-download2815959664.zip', 'name': 'download', 'tool_call_id': 'cdf7eb2e'}, {'role': 'assistant', 'content': '', 'tool_calls': [{'id': '07cdee86', 'type': 'function', 'function': {'name': 'exec', 'arguments': '{"command":"unzip /tmp/gpt-download2815959664.zip","directory":"."}'}}]}, {'role': 'tool', 'content': 'Archive:  /tmp/gpt-download2815959664.zip\n  inflating: chinook.db              \n', 'name': 'exec', 'tool_call_id': '07cdee86'}, {'role': 'assistant', 'content': '', 'tool_calls': [{'id': 'e8042027', 'type': 'function', 'function': {'name': 'download', 'arguments': '{"url":"https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip"}'}}]}, {'role': 'tool', 'content': '/tmp/gpt-download3736408077.zip', 'name': 'download', 'tool_call_id': 'e8042027'}]
     new_msgs = preprocess_input(msgs, tools)
     print(json.dumps(new_msgs, indent=2))
     
