@@ -179,7 +179,7 @@ def process_messages(messages: List[dict], function_str: str):
             func_observation_array = list(func_observation_map.values())
             for i,a in enumerate(func_observation_array):
                 if a == "":
-                    func_observation_array[i] = "Empty Result"
+                    func_observation_array[i] = "done"
             observation_str = json.dumps(func_observation_array)
             
             observation_call = {"role": "observation", "content": observation_str}
@@ -219,7 +219,7 @@ def process_messages(messages: List[dict], function_str: str):
         func_observation_array = list(func_observation_map.values())
         for i,a in enumerate(func_observation_array):
             if a == "":
-                func_observation_array[i] = "Empty Result"
+                func_observation_array[i] = "done"
         observation_str = json.dumps(func_observation_array)
         observation_call = {"role": "observation", "content": observation_str}
         processed_msg.append(observation_call)
