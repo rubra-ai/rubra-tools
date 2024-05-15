@@ -174,7 +174,6 @@ def process_messages(messages: List[dict], function_str: str):
     processed_msg = []
 
     for i in range(len(messages)):
-        print(f"\n=============This Message : {messages[i]}================\n\n")
         
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
             # Insert the observation from the tool call before the next message
@@ -217,7 +216,6 @@ def process_messages(messages: List[dict], function_str: str):
         else:
             processed_msg.append(messages[i])
         
-        print(processed_msg)
 
     if len(func_observation_map) > 0:
         # Insert the observation from the tool call before the next message
