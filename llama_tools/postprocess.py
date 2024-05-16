@@ -65,9 +65,13 @@ def clean_json_strings(input_str):
 
 
 def postprocess_output(output_str: str) -> List[dict]:
-    if not output_str.lstrip().startswith("<functions>"):
+    if output_str.lstrip().startswith("<functions>"):
+        str_to_parse = output_str.split("<functions>")[1]
+    elif output_str.lstrip().startswith("functions>"):
+        str_to_parse = output_str.split("functions>")[1]
+    else:
         return []
-    str_to_parse = output_str.split("<functions>")[1]
+    
     # list_of_str_to_parse = str_to_parse.splitlines() # TODO: need better way to handle jsonl format
     list_of_str_to_parse = str_to_parse.split("\n")
     function_call_json = []
