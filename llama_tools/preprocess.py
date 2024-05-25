@@ -3,12 +3,13 @@ import json
 
 
 TOOL_SYSTEM_PROMPT_RUBRA = (
-    "You have access to the following tools:\n {tool_text}\n"
+    "You have access to the following tools: {tool_text}\n"
     "You can choose to respond with one or more tool calls at once, or with a chat message back to the user. "
     "Ensure you have all necessary details before making tool calls. If additional information is needed, "
     "ask the user appropriately. Any tool call you make must correspond to the functions listed above.\n"
-    "If you decide to call tools, format your response in JSONL. Start with the keyword `<functions>` followed by the JSON object:\n"
-    '`<functions>{{"name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}`'
+    "If you decide to call a tool, format it like this: "
+    '[TOOL_CALLS]{{"name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}[/TOOL_CALLS] '
+    "where the JSON wrapped between [TOOL_CALLS] and [/TOOL_CALLS] represents the function call."
 )
 
 def json_schema_to_typescript_type(schema, param_name):
