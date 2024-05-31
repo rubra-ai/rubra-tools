@@ -8,8 +8,8 @@ TOOL_SYSTEM_PROMPT_RUBRA = (
     "Ensure you have all necessary details before making tool calls. If additional information is needed, "
     "ask the user appropriately. Any tool call you make must correspond to the functions listed above.\n"
     "If you decide to call a tool, format it like this: "
-    '[TOOL_CALLS]{{"name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}[/TOOL_CALLS] '
-    "where the JSON wrapped between [TOOL_CALLS] and [/TOOL_CALLS] represents the function call."
+    'toolcall{{"id":"PLACEHOLDER", "name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}endtoolcall\n'
+    "where the JSON wrapped between toolcall and endtoolcall represents the function call."
 )
 
 def json_schema_to_typescript_type(schema, param_name):
@@ -177,16 +177,11 @@ def process_messages(messages: List[dict], function_str: str):
     for i in range(len(messages)):
         
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
-            # Insert the observation from the tool call before the next message
-            func_observation_array = list(func_observation_map.values())
-            for x,a in enumerate(func_observation_array):
-                if a == "":
-                    func_observation_array[x] = "done"
+            func_observation_array = [f"{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}" for k in func_observation_map]
             observation_str = json.dumps(func_observation_array)
-            
-            observation_call = {"role": "observation", "content": observation_str}
+            observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
             processed_msg.append(observation_call)
-            func_observation_map = {}
+            func_observation_map.clear()
 
         if i == 0:
             if messages[0]["role"] == "system":
@@ -202,7 +197,7 @@ def process_messages(messages: List[dict], function_str: str):
         elif messages[i]["role"] == "assistant" and "tool_calls" in messages[i]:
             # Convert OpenAI function call format to Rubra format
             tool_call_str = construct_tool_call_str(messages[i]["tool_calls"], func_observation_map)
-            function_call = {"role": "function", "content": tool_call_str}
+            function_call = {"role": "assistant", "content": tool_call_str}
             processed_msg.append(function_call)
 
         elif messages[i]["role"] == "tool":
@@ -219,13 +214,9 @@ def process_messages(messages: List[dict], function_str: str):
         
 
     if len(func_observation_map) > 0:
-        # Insert the observation from the tool call before the next message
-        func_observation_array = list(func_observation_map.values())
-        for x,a in enumerate(func_observation_array):
-            if a == "":
-                func_observation_array[x] = "done"
+        func_observation_array = [f"{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}" for k in func_observation_map]
         observation_str = json.dumps(func_observation_array)
-        observation_call = {"role": "observation", "content": observation_str}
+        observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
         processed_msg.append(observation_call)
         func_observation_map.clear()
 
@@ -240,10 +231,10 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
         
         if type(tool_call["function"]["arguments"]) == str:
             tool_call["function"]["arguments"] = json.loads(tool_call["function"]["arguments"])
-        tool_list.append(str(tool_call["function"]))
+        tool_list.append("toolcall"+str(tool_call["function"]) + "endtoolcall\n")
 
     # Converting the Python dictionary to a YAML formatted string
-    tool_call_str = "\n".join(tool_list)
+    tool_call_str = "".join(tool_list)
     return tool_call_str
 
 
