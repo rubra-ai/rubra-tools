@@ -68,7 +68,7 @@ def postprocess_output(output_str: str) -> List[dict]:
     if "endtoolcall" not in output_str:
         return []
     
-    list_of_str_to_parse = [s.split("toolcall")[1] for s in output_str.split("endtoolcall")]
+    list_of_str_to_parse = [s.split("toolcall")[1] for s in output_str.split("endtoolcall") if "toolcall" in s]
     function_call_json = []
     try: # every function call has to be valid json
         for l in list_of_str_to_parse:
