@@ -177,7 +177,7 @@ def process_messages(messages: List[dict], function_str: str):
     for i in range(len(messages)):
         
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
-            func_observation_array = [f"{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}" for k in func_observation_map]
+            func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
             observation_str = "".join(func_observation_array)
             observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
             processed_msg.append(observation_call)
@@ -214,7 +214,7 @@ def process_messages(messages: List[dict], function_str: str):
         
 
     if len(func_observation_map) > 0:
-        func_observation_array = [f"{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}" for k in func_observation_map]
+        func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
         observation_str = "".join(func_observation_array)
         observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
         processed_msg.append(observation_call)
