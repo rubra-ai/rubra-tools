@@ -180,7 +180,7 @@ def process_messages(messages: List[dict], function_str: str):
             # func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
             func_observation_array = [f'{func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
             observation_str = json.dumps(func_observation_array)
-            observation_call = {"role": "user", "content": "start observation " + observation_str + " end endobservation"}
+            observation_call = {"role": "user", "content": "start observation " + observation_str + " end observation"}
             processed_msg.append(observation_call)
             func_observation_map.clear()
 
@@ -218,7 +218,7 @@ def process_messages(messages: List[dict], function_str: str):
         # func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
         func_observation_array = [f'{func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
         observation_str = json.dumps(func_observation_array)
-        observation_call = {"role": "user", "content": "start observation " + observation_str + " end endobservation"}
+        observation_call = {"role": "user", "content": "start observation " + observation_str + " end observation"}
         processed_msg.append(observation_call)
         func_observation_map.clear()
 
