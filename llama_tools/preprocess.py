@@ -8,8 +8,8 @@ TOOL_SYSTEM_PROMPT_RUBRA = (
     "Ensure you have all necessary details before making tool calls. If additional information is needed, "
     "ask the user appropriately. Any tool call you make must correspond to the functions listed above.\n"
     "If you decide to call a tool, format it like this: "
-    'toolcall{{"id":"PLACEHOLDER", "name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}endtoolcall\n'
-    "where the JSON wrapped between toolcall and endtoolcall represents the function call."
+    'starttoolcall{{"name": "<function_name>", "arguments": {{"<arg1_name>": "<arg1_value>", "<arg2_name>": "<arg2_value>", ...}}}}endtoolcall '
+    "where the JSON wrapped between starttoolcall and endtoolcall represents the function call.\n"
 )
 
 def json_schema_to_typescript_type(schema, param_name):
@@ -177,9 +177,10 @@ def process_messages(messages: List[dict], function_str: str):
     for i in range(len(messages)):
         
         if messages[i]["role"] != "tool" and len(func_observation_map) > 0:
-            func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
-            observation_str = "".join(func_observation_array)
-            observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
+            # func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
+            func_observation_array = [f'{func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
+            observation_str = json.dumps(func_observation_array)
+            observation_call = {"role": "user", "content": "start observation " + observation_str + " end endobservation"}
             processed_msg.append(observation_call)
             func_observation_map.clear()
 
@@ -214,9 +215,10 @@ def process_messages(messages: List[dict], function_str: str):
         
 
     if len(func_observation_map) > 0:
-        func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
-        observation_str = "".join(func_observation_array)
-        observation_call = {"role": "user", "content": "observations\n" + observation_str + "endobservations"}
+        # func_observation_array = [f'{k}: {func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
+        func_observation_array = [f'{func_observation_map[k] if func_observation_map[k] != "" else "done"}' for k in func_observation_map]
+        observation_str = json.dumps(func_observation_array)
+        observation_call = {"role": "user", "content": "start observation " + observation_str + " end endobservation"}
         processed_msg.append(observation_call)
         func_observation_map.clear()
 
@@ -231,7 +233,7 @@ def construct_tool_call_str(tool_calls, func_observation_map) -> str:
         
         if type(tool_call["function"]["arguments"]) == str:
             tool_call["function"]["arguments"] = json.loads(tool_call["function"]["arguments"])
-        tool_list.append("toolcall"+str(tool_call["function"]) + "endtoolcall\n")
+        tool_list.append("starttoolcall"+str(tool_call["function"]) + "endtoolcall")
 
     # Converting the Python dictionary to a YAML formatted string
     tool_call_str = "".join(tool_list)

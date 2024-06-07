@@ -67,7 +67,7 @@ def postprocess_output(output_str: str) -> List[dict]:
     if "endtoolcall" not in output_str:
         return []
     
-    list_of_str_to_parse = [s.split("toolcall")[1] for s in output_str.split("endtoolcall") if "toolcall" in s]
+    list_of_str_to_parse = [s.split("starttoolcall")[1] for s in output_str.split("endtoolcall") if "starttoolcall" in s]
     function_call_json = []
     try: # every function call has to be valid json
         for l in list_of_str_to_parse:
@@ -89,7 +89,7 @@ def postprocess_output(output_str: str) -> List[dict]:
     return res
 
 if __name__ == "__main__":
-    output_str = "toolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"drive\\\"}\"}endtoolcalltoolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"air\\\"}\"}endtoolcall"
+    output_str = "starttoolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"drive\\\"}\"}endtoolcallstarttoolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"air\\\"}\"}endtoolcall"
     # output_str = '<functions>{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "driving"}}\n{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "air"}}'
     # output_str = ' <functions>{"name": "write", "arguments": "{\\"content\\":\\"# Sample *.gpt Files\\\\n\\\\n## add-go-mod-dep.gpt\\\\nLink to add-go-mod-dep.gpt\\rn\\\\n## bob-as-shell.gpt\\\\nLink to bob-as-shell.gpt\\rn\\\\n## bob.gpt\\\\nLink to bob.gpt\\rn\\\\n## car-notifier/car-notifier.gpt\\\\nLink to car-notifier/car-notifier.gpt\\rn\\\\n## count-lines-of-code.gpt\\\\nLink to count-lines-of-code.gpt\\rn\\\\n## describe-code.gpt\\\\nLink to describe-code.gpt\\rn\\\\n## echo.gpt\\\\nLink to echo.gpt\\rn\\\\n## fac.gpt\\\\nLink to fac.gpt\\rn\\\\n## git-commit.gpt\\\\nLink to git-commit.gpt\\rn\\\\n## hacker-news-headlines.gpt\\\\nLink to hacker-news-headlines.gpt\\rn\\\\n## hamlet-summarizer/hamlet-summarizer.gpt\\\\nLink to hamlet-summarizer/hamlet-summarizer.gpt\\rn\\\\n## helloworld.gpt\\\\nLink to helloworld.gpt\\rn\\\\n## recipegenerator/recipegenerator.gpt\\\\nLink to recipegenerator/recipegenerator.gpt\\rn\\\\n## samples-readme.gpt\\\\nLink to samples-readme.gpt\\rn\\\\n## search.gpt\\\\nLink to search.gpt\\rn\\\\n## sentiments.gpt\\\\nLink to sentiments.gpt\\rn\\\\n## sqlite-download.gpt\\\\nLink to sqlite-download.gpt\\rn\\\\n## syntax-from-code.gpt\\\\nLink to syntax-from-code.gpt\\rn\\\\n## time.gpt\\\\nLink to time.gpt\\rn\\\\n## treasure-hunt/treasure-hunt.gpt\\\\nLink to treasure-hunt/treasure-hunt.gpt\\\\n\\\\nThis document provides a summary of each sample *.gpt file located in the examples/ directory. Each entry includes a link to the referenced file.\\\\n\\",\\"filename\\":\\"examples/README.md\\"}"}'
     parsed_json = postprocess_output(output_str)
