@@ -25,3 +25,9 @@ repository = https://upload.pypi.org/legacy/
 username = __token__
 password = <your-api-token-starts-with-pypi->
 ```
+
+## Extra requirement
+need to use npm to install package `jsonrepair` to help fix some edgecases.
+```
+npm install jsonrepair
+```
