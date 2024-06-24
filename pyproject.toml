@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
-module = "llama_tools"  # Name of the directory containing your Python code
+module = "rubra_tools"  # Name of the directory containing your Python code
 author = "Yingbei Tong"
 author-email = "yingbei@acorn.io"
 home-page = "https://yourpackage.example.com"
