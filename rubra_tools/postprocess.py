@@ -4,13 +4,6 @@ from typing import List
 import pythonmonkey
 import re
 
-jsonrepair = pythonmonkey.require('jsonrepair').jsonrepair
-
-
-import json
-import pythonmonkey
-import re
-
 # Assuming jsonrepair is accessible
 jsonrepair = pythonmonkey.require('jsonrepair').jsonrepair
 
