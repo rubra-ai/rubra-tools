@@ -50,7 +50,7 @@ def postprocess_output(output_str: str) -> List[dict]:
             parsed_call = parse_json_safely(call)
             cleaned_call = clean_json_object(parsed_call)
             
-            if isinstance(cleaned_call.get('arguments'), dict):
+            if isinstance(cleaned_call, dict):
                 cleaned_call['arguments'] = json.dumps(cleaned_call['arguments'])
             
             function_call_json.append(cleaned_call)
@@ -69,8 +69,7 @@ def postprocess_output(output_str: str) -> List[dict]:
 
 if __name__ == "__main__":
     # Test the function with a sample input
-    output_str = '''Some text before starttoolcall{"name": "funcA", "arguments": {"param1": 1}endtoolcall
-    More text starttoolcall{"name": "funcB", "arguments": {"param2": "test"}}endtoolcall'''
+    output_str = '''starttoolcall{'arguments': {'content': '# Examples\n\nHere is a consolidated summary of each sample *.gpt file in the examples directory.\n\n- [add-go-mod-dep.gpt](add-go-mod-dep.gpt)\n- [bob-as-shell.gpt](bob-as-shell.gpt)\n- [bob.gpt](bob.gpt)\n- [car-notifier/car-notifier.gpt](car-notifier/car-notifier.gpt)\n- [count-lines-of-code.gpt](count-lines-of-code.gpt)\n- [describe-code.gpt](describe-code.gpt)\n- [echo.gpt](echo.gpt)\n- [fac.gpt](fac.gpt)\n- [git-commit.gpt](git-commit.gpt)\n- [hacker-news-headlines.gpt](hacker-news-headlines.gpt)\n- [hamlet-summarizer/hamlet-summarizer.gpt](hamlet-summarizer/hamlet-summarizer.gpt)\n- [helloworld.gpt](helloworld.gpt)\n- [myexample.gpt](myexample.gpt)\n- [recipegenerator/recipegenerator.gpt](recipegenerator/recipegenerator.gpt)\n- [samples-readme.gpt](samples-readme.gpt)\n- [search.gpt](search.gpt)\n- [sentiments.gpt](sentiments.gpt)\n- [sqlite-download.gpt](sqlite-download.gpt)\n- [syntax-from-code.gpt](syntax-from-code.gpt)\n- [time.gpt](time.gpt)\n- [travel-agent.gpt](travel-agent.gpt)\n- [treasure-hunt/treasure-hunt.gpt](treasure-hunt/treasure-hunt.gpt)\n", "filename": "examples/README.md"}}endtoolcall'''
     
     parsed_json = postprocess_output(output_str)
     if parsed_json:
