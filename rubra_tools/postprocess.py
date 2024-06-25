@@ -74,7 +74,6 @@ if __name__ == "__main__":
     
     parsed_json = postprocess_output(output_str)
     if parsed_json:
-        print(f"PARSED_JSON type: {type(parsed_json)}")
-        print(parsed_json)
+        print(json.dumps(parsed_json, indent=2))
     else :
         print(output_str)
