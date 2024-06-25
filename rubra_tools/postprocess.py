@@ -1,5 +1,6 @@
 import json
 import uuid
+import re
 from typing import List
 import pythonmonkey
 import re
@@ -7,71 +8,55 @@ import re
 # Assuming jsonrepair is accessible
 jsonrepair = pythonmonkey.require('jsonrepair').jsonrepair
 
-def parse_if_json(value):
-    # print(f"Parsing value: {value}")
-    try:
-        value = jsonrepair(value)
-        return json.loads(value)
-    except Exception as e:
-        try:
-            return json.loads(value)
-        except ValueError:
-            return value
-
 def clean_command_string(command_str):
-    # Use regex to remove unwanted backslashes except those needed for actual escape sequences
     cleaned_command = re.sub(r'\\(?!["\\/bfnrt]|u[a-fA-F0-9]{4})', '', command_str)
-    # Correctly handle escaped double quotes
     cleaned_command = cleaned_command.replace('\\"', '"')
-    # Remove surrounding quotes if present
     if cleaned_command.startswith('"') and cleaned_command.endswith('"'):
         cleaned_command = cleaned_command[1:-1]
     return cleaned_command
 
-def clean_json_strings(input_str):
+def parse_json_safely(json_str):
     try:
-        # Use jsonrepair to fix the JSON and load it
-        repaired_json = jsonrepair(input_str)
-        data = json.loads(repaired_json)
-        # Check each item and parse if it's a JSON-formatted string
-        if isinstance(data, dict):
-            for key, value in data.items():
-                if isinstance(value, str):
-                    # Attempt to parse the string value as JSON if it seems like JSON
-                    if value.startswith('{') or value.startswith('['):
-                        data[key] = parse_if_json(value)
-                    else:
-                        # Otherwise, use the specific cleaning logic for command-like strings
-                        data[key] = clean_command_string(value)
-                elif isinstance(value, dict):
-                    # Recursively clean any nested dictionaries
-                    data[key] = {k: clean_command_string(v) if isinstance(v, str) else v for k, v in value.items()}
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        try:
+            repaired = jsonrepair(json_str)
+            return json.loads(repaired)
+        except Exception:
+            return json_str
 
-        # Return the modified data structure, not as a JSON string but as a dictionary
-        return data
+def clean_json_object(obj):
+    if isinstance(obj, dict):
+        return {k: clean_json_object(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_json_object(item) for item in obj]
+    elif isinstance(obj, str):
+        cleaned = clean_command_string(obj)
+        return parse_json_safely(cleaned) if cleaned.startswith('{') or cleaned.startswith('[') else cleaned
+    else:
+        return obj
 
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
-        return None
-
-
+def extract_tool_calls(output_str):
+    pattern = r'starttoolcall(.*?)endtoolcall'
+    matches = re.findall(pattern, output_str, re.DOTALL)
+    return matches
 
 def postprocess_output(output_str: str) -> List[dict]:
-    if "endtoolcall" not in output_str:
-        return []
+    tool_calls = extract_tool_calls(output_str)
     
-    list_of_str_to_parse = [s.split("starttoolcall")[1] for s in output_str.split("endtoolcall") if "starttoolcall" in s]
     function_call_json = []
-    try: # every function call has to be valid json
-        for l in list_of_str_to_parse:
-            fc = clean_json_strings(l)
-                
-            if type(fc["arguments"]) != str:
-                fc["arguments"] = json.dumps(fc["arguments"])
-            function_call_json.append(fc)
-    except Exception as e:
-        print(f"Error : {e}")
-        
+    for call in tool_calls:
+        try:
+            parsed_call = parse_json_safely(call)
+            cleaned_call = clean_json_object(parsed_call)
+            
+            if isinstance(cleaned_call.get('arguments'), dict):
+                cleaned_call['arguments'] = json.dumps(cleaned_call['arguments'])
+            
+            function_call_json.append(cleaned_call)
+        except Exception as e:
+            print(f"Error processing function call: {e}")
+    
     res = []
     for fc in function_call_json:
         res.append({
@@ -79,12 +64,14 @@ def postprocess_output(output_str: str) -> List[dict]:
             "function": fc,
             "type": "function",
         })
+    
     return res
 
 if __name__ == "__main__":
-    output_str = "starttoolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"drive\\\"}\"}endtoolcallstarttoolcall{\"name\": \"calculate_distance\", \"arguments\": \"{\\\"origin\\\":\\\"San \\nFrancisco\\\",\\\"destination\\\":\\\"Cupertino\\\",\\\"mode\\\":\\\"air\\\"}\"}endtoolcall"
-    # output_str = '<functions>{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "driving"}}\n{"name": "calculate_distance", "arguments": {"origin": "San Francisco", "destination": "Cupertino", "mode": "air"}}'
-    # output_str = ' <functions>{"name": "write", "arguments": "{\\"content\\":\\"# Sample *.gpt Files\\\\n\\\\n## add-go-mod-dep.gpt\\\\nLink to add-go-mod-dep.gpt\\rn\\\\n## bob-as-shell.gpt\\\\nLink to bob-as-shell.gpt\\rn\\\\n## bob.gpt\\\\nLink to bob.gpt\\rn\\\\n## car-notifier/car-notifier.gpt\\\\nLink to car-notifier/car-notifier.gpt\\rn\\\\n## count-lines-of-code.gpt\\\\nLink to count-lines-of-code.gpt\\rn\\\\n## describe-code.gpt\\\\nLink to describe-code.gpt\\rn\\\\n## echo.gpt\\\\nLink to echo.gpt\\rn\\\\n## fac.gpt\\\\nLink to fac.gpt\\rn\\\\n## git-commit.gpt\\\\nLink to git-commit.gpt\\rn\\\\n## hacker-news-headlines.gpt\\\\nLink to hacker-news-headlines.gpt\\rn\\\\n## hamlet-summarizer/hamlet-summarizer.gpt\\\\nLink to hamlet-summarizer/hamlet-summarizer.gpt\\rn\\\\n## helloworld.gpt\\\\nLink to helloworld.gpt\\rn\\\\n## recipegenerator/recipegenerator.gpt\\\\nLink to recipegenerator/recipegenerator.gpt\\rn\\\\n## samples-readme.gpt\\\\nLink to samples-readme.gpt\\rn\\\\n## search.gpt\\\\nLink to search.gpt\\rn\\\\n## sentiments.gpt\\\\nLink to sentiments.gpt\\rn\\\\n## sqlite-download.gpt\\\\nLink to sqlite-download.gpt\\rn\\\\n## syntax-from-code.gpt\\\\nLink to syntax-from-code.gpt\\rn\\\\n## time.gpt\\\\nLink to time.gpt\\rn\\\\n## treasure-hunt/treasure-hunt.gpt\\\\nLink to treasure-hunt/treasure-hunt.gpt\\\\n\\\\nThis document provides a summary of each sample *.gpt file located in the examples/ directory. Each entry includes a link to the referenced file.\\\\n\\",\\"filename\\":\\"examples/README.md\\"}"}'
+    # Test the function with a sample input
+    output_str = '''Some text before starttoolcall{"name": "funcA", "arguments": {"param1": 1}endtoolcall
+    More text starttoolcall{"name": "funcB", "arguments": {"param2": "test"}}endtoolcall'''
+    
     parsed_json = postprocess_output(output_str)
     if parsed_json:
         print(f"PARSED_JSON type: {type(parsed_json)}")
