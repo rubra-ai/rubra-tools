@@ -151,6 +151,12 @@ else:
     print(raw_output)
 ```
 
+You should see this output, which is a function call made by the ai assistant:
+```
+[{'id': 'fc65a533', 'function': {'name': 'addition', 'arguments': '{"a": "4", "b": "6"}'}, 'type': 'function'}]
+```
+
+
 4. continue the conversation by provide the function call result:
 ```python
 if function_call:
@@ -165,6 +171,11 @@ if function_call:
         print(function_call)
     else:
         print(raw_output)
+```
+
+The AI will make another call
+```
+[{'id': '2ffc3de4', 'function': {'name': 'addition', 'arguments': '{"a": "10", "b": "2"}'}, 'type': 'function'}]
 ```
 
 5. keep going...
