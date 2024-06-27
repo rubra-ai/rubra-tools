@@ -1,5 +1,11 @@
 # rubra-tools
 
+## prerequisites
+need to use npm to install package `jsonrepair` to help fix some rare edgecases.
+```
+npm install jsonrepair
+```
+
 ## Use rubra-tools with transformer lib
 1. load a rubra function calling model:
 ```python
@@ -206,10 +212,4 @@ create `~/.pypirc` with:
 repository = https://upload.pypi.org/legacy/
 username = __token__
 password = <your-api-token-starts-with-pypi->
-```
-
-## Extra requirement
-need to use npm to install package `jsonrepair` to help fix some edgecases.
-```
-npm install jsonrepair
 ```
