@@ -1,7 +1,12 @@
 # rubra-tools
 
 ## prerequisites
-need to use npm to install package `jsonrepair` to help fix some rare edgecases.
+pip install rubra-tools:
+```
+pip install rubra_tools
+```
+
+Use npm to install package `jsonrepair` to help fix some rare edgecases.
 ```
 npm install jsonrepair
 ```
